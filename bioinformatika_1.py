@@ -4,6 +4,9 @@ from Bio.Data import CodonTable
 from Bio.Align.Applications import MuscleCommandline
 from Bio.Phylo.TreeConstruction import DistanceCalculator, DistanceTreeConstructor
 from Bio import AlignIO
+from Bio.SeqUtils import GC
+import numpy as np
+import pylab
 import Levenshtein as levenshtein
 import io
 
@@ -24,6 +27,7 @@ class BioSeqFinder:
     muscle_aligned_output_file_name = "msa_MUSCLE_aligned_proteins.fasta"
     muscle_aligned_output_file_name_phy = "msa_MUSCLE_aligned_proteins.phy"
     align = ''
+    gc = []
 
     # constructor that accepts input sequence files
     def __init__(self, input_data_files, protein_save_file):
@@ -38,7 +42,7 @@ class BioSeqFinder:
     def write_proteins_to_file(self):
         seq_records = []
         i = 1
-        for protein in self.proteins:
+        for [j, protein] in self.proteins:
             description = "Baltymas " + str(i)
             seq_records.append(
                 SeqRecord(protein, id=str(i), description=description))
@@ -56,22 +60,24 @@ class BioSeqFinder:
 
     def get_proteins(self):
         proteins = []
+        i = 0
         for orf in self.orfs:
             codones = self.split_into_codones(orf)
             protein = ''
             for codone in codones:
                 if codone in self.stop_codons and protein != '':
-                    proteins.append(protein.translate(11))
+                    proteins.append([i, protein.translate(11)])
                     protein = ''
                 elif protein != '' or codone in self.start_codons:
                     protein += codone
+            i += 1
 
         self.proteins = proteins
         return proteins
 
     def filter_proteins_by_bp(self):
         if (len(self.proteins) > 0):
-            self.proteins = [protein for protein in self.proteins if len(
+            self.proteins = [[i, protein] for [i, protein] in self.proteins if len(
                 protein) >= self.min_bp_length]
 
     def get_all_orfs(self):
@@ -108,6 +114,20 @@ class BioSeqFinder:
         tree = constructor.build_tree(self.align)
         Phylo.draw(tree)
 
+    def calculate_GC_percentages(self):
+        gc = [GC(orf) for orf in self.orfs]
+        self.gc = gc
+        return gc
+
+    def draw_histogram_for_GC(self):
+        pylab.xlabel("ORF")
+        pylab.xlim(0, 12)
+        pylab.xticks(np.arange(0, len(self.orfs), 1.0))
+        pylab.ylabel("Percentage of GC")
+        pylab.grid()
+        pylab.plot(self.gc)
+        pylab.savefig("gc.png")
+
 
 input_data_files = ["plazmide.fasta", "test.fasta"]
 protein_output_file = "proteins.fasta"
@@ -120,3 +140,5 @@ seq_analyze_instance.write_proteins_to_file()
 seq_analyze_instance.perform_MSA_on_proteins()
 seq_analyze_instance.calculate_distance_matrix()
 seq_analyze_instance.draw_phylo_tree_according_MSA_alignment()
+seq_analyze_instance.calculate_GC_percentages()
+seq_analyze_instance.draw_histogram_for_GC()
