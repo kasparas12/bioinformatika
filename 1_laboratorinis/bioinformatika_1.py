@@ -126,6 +126,8 @@ class BioSeqFinder:
         pylab.ylabel("Percentage of GC")
         pylab.grid()
         pylab.plot(self.gc)
+        protein_orf_nr = [i for [i, protein] in self.proteins]
+        pylab.plot(protein_orf_nr)
         pylab.savefig("gc.png")
 
 
@@ -142,3 +144,4 @@ seq_analyze_instance.calculate_distance_matrix()
 seq_analyze_instance.draw_phylo_tree_according_MSA_alignment()
 seq_analyze_instance.calculate_GC_percentages()
 seq_analyze_instance.draw_histogram_for_GC()
+print("%d", len(seq_analyze_instance.orfs))
