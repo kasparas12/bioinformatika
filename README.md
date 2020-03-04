@@ -1,2 +1,2 @@
 # Bioinformatikos kurso laboratoriniai darbai
-VU MIF Bioinformatikos pasirenkamojo modulio Programų sistemų studentams Kasparo Taminsko laboratorinių darbų saugykla
+VU MIF Bioinformatikos pasirenkamojo modulio VU MIF Programų sistemų studentams Kasparo Taminsko laboratorinių darbų saugykla
